@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "dialogue"
+version = "0.9.0"
+description = ""
+authors = ["Kalle Saunamäki"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^3.0.0"
+flask-sqlalchemy = "^3.1.1"
+psycopg2 = "^2.9.9"
+argon2-cffi = "^23.1.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+coverage = "^7.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+

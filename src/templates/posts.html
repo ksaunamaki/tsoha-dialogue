@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ site_name }}</title>
+    </head>
+    <body>
+        <div class="header"><h1>{{ site_name }}</h1></div>
+        <div class="site">
+            <h2>{{ topic.name }}</h2>
+            {% for post in posts %}
+            <div class="post">
+                <p>{{ post.content }}</p>
+                <i>{{ post.user }}</i>
+            </div>
+            {% endfor %}
+
+            <div class="new-topic"><a href="/post_reply/{{ topic.topic_id }}">REPLY</a></div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ site_name }}</title>
+    </head>
+    <body>
+        <div class="header"><h1>{{ site_name }}</h1></div>
+        <div class="site">
+            {% if topics|length %}
+            <ul>
+                {% for topic in topics %}
+                <li><a href="/read/{{ topic.topic_id }}">{{ topic.name }}</a> (<b>{{ topic.messages }}</b> messages) <br />
+                <i>{{ topic.user }}</i> on {{ topic.created_at }}
+                {% endfor %}
+            </ul>
+            {% if show_more > 0 %}
+            <a href="/{{ show_more }}">Show more topics</a>
+            {% endif %}
+            {% endif %}
+
+            <div class="new-topic"><a href="/post_topic">POST NEW</a></div>
+        </div>
+    </body>
+</html>
