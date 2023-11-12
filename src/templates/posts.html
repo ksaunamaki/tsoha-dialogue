@@ -2,19 +2,33 @@
 <html>
     <head>
         <title>{{ site_name }}</title>
+        <link href="/static/dialogue.css" rel="stylesheet" />
     </head>
     <body>
-        <div class="header"><h1>{{ site_name }}</h1></div>
+        <div class="header"><h1><a href="/">{{ site_name }}</a></h1></div>
         <div class="site">
             <h2>{{ topic.name }}</h2>
-            {% for post in posts %}
-            <div class="post">
-                <p>{{ post.content }}</p>
-                <i>{{ post.user }}</i>
+            <div class="posts">
+                {% for post in posts %}
+                <div id="post-{{ post.message_id }}" class="post" style="margin-left: {{ post.indent_for_html }}">
+                    <div class="post-id">
+                        {% if post.reply_to %}
+                        Message {{ post.message_id }} in <a href="#post-{{ post.reply_to }}">reply to {{ post.reply_to }}</a>
+                        {% else %}
+                        Message {{ post.message_id }}
+                        {% endif %}
+                    </div>
+                    {% for para in post.content_for_html %}
+                    <p>{{para}}</p>
+                    {% endfor %}
+                    <div class="post-footer">
+                        <div class="new-reply"><a href="/post_reply/{{ topic.topic_id }}/{{ post.message_id }}"><span>&#8617;</span>  reply and quote</a></div>
+                        <i>{{ post.user }} on {{ post.created_at }}</i>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-
-            <div class="new-topic"><a href="/post_reply/{{ topic.topic_id }}">REPLY</a></div>
+            <div class="new-reply"><a href="/post_reply/{{ topic.topic_id }}">Compose new reply</a></div>
         </div>
     </body>
 </html>
