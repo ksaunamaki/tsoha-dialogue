@@ -3,18 +3,18 @@ from datetime import datetime
 from db import SqlReturnValuePlaceholder
 
 class Topic:
-    def __init__(self, topic_id, created_at, name, user, upvotes, messages, is_upvoted):
+    def __init__(self, topic_id, created_at, name, user, upvotes, posts, is_upvoted):
         self.topic_id = topic_id
         self.created_at = created_at
         self.name = name
         self.user = user
         self.upvotes = upvotes
-        self.messages = messages
+        self.posts = posts
         self.is_upvoted = is_upvoted
 
 class Post:
-    def __init__(self, message_id, reply_to, created_at, content, user, is_deleted):
-        self.message_id = message_id
+    def __init__(self, post_id, reply_to, created_at, content, user, is_deleted):
+        self.post_id = post_id
         self.reply_to = reply_to
         self.created_at = created_at
         self.content = content
@@ -37,14 +37,14 @@ class TopicManager:
     def __init__(self, db_access: DatabaseAccess):
         self.db_access = db_access
 
-    def _post_exists(self, topic_id, message_id):
+    def _post_exists(self, topic_id, post_id):
         results = self.db_access.execute_sql_query(
             "SELECT COUNT(*) " \
-            "FROM messages " \
-            "WHERE topic_id = :topicid AND message_id = :messageid",
+            "FROM posts " \
+            "WHERE topic_id = :topicid AND post_id = :messageid",
             {
                 "topicid": topic_id,
-                "messageid": message_id
+                "messageid": post_id
             })
         
         if len(results) == 0 or results[0][0] == 0:
@@ -72,9 +72,9 @@ class TopicManager:
 
         if paginate_after is None:
             results = self.db_access.execute_sql_query(
-                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as messages," \
+                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as posts," \
                 "FALSE as is_upvoted " \
-                "FROM topics AS t, messages AS m, users AS u " \
+                "FROM topics AS t, posts AS m, users AS u " \
                 "WHERE t.topic_id = m.topic_id AND t.created_by = u.user_id " \
                 "GROUP BY t.topic_id, u.name " \
                 "ORDER BY CASE WHEN t.upvotes > 0 " \
@@ -84,9 +84,9 @@ class TopicManager:
                 {"pagesize":page_size})
         else:
             results = self.db_access.execute_sql_query(
-                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as messages," \
+                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as posts," \
                 "FALSE as is_upvoted " \
-                "FROM topics AS t, messages AS m, users AS u " \
+                "FROM topics AS t, posts AS m, users AS u " \
                 "WHERE t.topic_id = m.topic_id AND t.created_by = u.user_id " \
                 "GROUP BY t.topic_id, u.name " \
                 "ORDER BY CASE WHEN t.upvotes > 0 " \
@@ -107,14 +107,14 @@ class TopicManager:
 
         if paginate_after is None:
             results = self.db_access.execute_sql_query(
-                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as messages," \
+                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as posts," \
                 "t.topic_id IN (" \
                 "  SELECT t.topic_id " \
                 "  FROM topics AS t " \
                 "  LEFT JOIN upvotes AS u ON t.topic_id = u.topic_id " \
                 "  WHERE u.user_id = :userid " \
                 ") AS is_upvoted " \
-                "FROM topics AS t, messages AS m, users AS u " \
+                "FROM topics AS t, posts AS m, users AS u " \
                 "WHERE t.topic_id = m.topic_id AND t.created_by = u.user_id " \
                 "GROUP BY t.topic_id, u.name " \
                 "ORDER BY CASE WHEN t.upvotes > 0 " \
@@ -127,14 +127,14 @@ class TopicManager:
                 })
         else:
             results = self.db_access.execute_sql_query(
-                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as messages," \
+                "SELECT t.topic_id,t.topic,t.created_at,u.name,t.upvotes,count(m.*) as posts," \
                 "t.topic_id IN (" \
                 "  SELECT t.topic_id " \
                 "  FROM topics AS t " \
                 "  LEFT JOIN upvotes AS u ON t.topic_id = u.topic_id " \
                 "  WHERE u.user_id = :userid " \
                 ") AS is_upvoted " \
-                "FROM topics AS t, messages AS m, users AS u " \
+                "FROM topics AS t, posts AS m, users AS u " \
                 "WHERE t.topic_id = m.topic_id AND t.created_by = u.user_id " \
                 "GROUP BY t.topic_id, u.name " \
                 "ORDER BY CASE WHEN t.upvotes > 0 " \
@@ -166,24 +166,24 @@ class TopicManager:
             result.topic,
             result.name,
             result.upvotes,
-            result.messages,
+            result.posts,
             result.is_upvoted), results))
     
 
     def get_posts_for_topic(self, topic_id):
 
         results = self.db_access.execute_sql_query(
-            "SELECT m.message_id,m.content,m.reply_to,m.created_at,u.name,m.is_deleted " \
-            "FROM messages AS m, users AS u " \
+            "SELECT m.post_id,m.content,m.reply_to,m.created_at,u.name,m.is_deleted " \
+            "FROM posts AS m, users AS u " \
             "WHERE m.topic_id = :topic AND m.user_id = u.user_id " \
-            "GROUP BY m.message_id, u.name " \
-            "ORDER BY m.message_id",
+            "GROUP BY m.post_id, u.name " \
+            "ORDER BY m.post_id",
             {"topic":topic_id})
         
         if results is None or len(results) == 0:
             return None
         
-        posts = list(map(lambda result: Post(result.message_id, result.reply_to, result.created_at.strftime('%Y-%m-%d %H:%M:%S'), \
+        posts = list(map(lambda result: Post(result.post_id, result.reply_to, result.created_at.strftime('%Y-%m-%d %H:%M:%S'), \
                                              result.content, result.name, result.is_deleted), results))
 
         # re-order posts by reply-to thread order and set indenting values
@@ -194,7 +194,7 @@ class TopicManager:
             if post.reply_to is None or post.reply_to not in message_pointers:
                 post.indent_level = 0
                 thread_ordered.append(post)
-                message_pointers[post.message_id] = len(thread_ordered) - 1
+                message_pointers[post.post_id] = len(thread_ordered) - 1
                 continue
 
             replied_message_index = message_pointers[post.reply_to]
@@ -209,10 +209,10 @@ class TopicManager:
                     break
 
             thread_ordered.insert(insert_index, post)
-            message_pointers[post.message_id] = insert_index
+            message_pointers[post.post_id] = insert_index
 
             for m_id, index in message_pointers.items():
-                if index < insert_index or m_id == post.message_id:
+                if index < insert_index or m_id == post.post_id:
                     continue
 
                 message_pointers[m_id] = message_pointers[m_id] + 1
@@ -222,10 +222,10 @@ class TopicManager:
        
     def add_post_for_topic(self, topic_id, user_id, reply_to, content):
         result = self.db_access.execute_sql_command_with_return(
-            "INSERT INTO messages " \
+            "INSERT INTO posts " \
             "(content, topic_id, reply_to, user_id)" \
             "VALUES (:content, :topic, :reply, :user) " \
-            "RETURNING message_id",
+            "RETURNING post_id",
             {
                 "content": content,
                 "topic": topic_id,
@@ -235,17 +235,17 @@ class TopicManager:
         
         return result[0] if result is not None and len(result) > 0 else None
     
-    def delete_post(self, topic_id, message_id):
-        if not self._post_exists(topic_id, message_id):
+    def delete_post(self, topic_id, post_id):
+        if not self._post_exists(topic_id, post_id):
             return False
 
         result = self.db_access.execute_sql_command(
-            "UPDATE messages " \
+            "UPDATE posts " \
             "SET content=:content, is_deleted = TRUE " \
-            "WHERE topic_id = :topicid AND message_id = :messageid",
+            "WHERE topic_id = :topicid AND post_id = :messageid",
             {
                 "topicid": topic_id,
-                "messageid": message_id,
+                "messageid": post_id,
                 "content": ""
             })
         
@@ -265,7 +265,7 @@ class TopicManager:
                     }
                 ),
                 (
-                    "INSERT INTO messages " \
+                    "INSERT INTO posts " \
                     "(topic_id, content, user_id)" \
                     "VALUES (:topic, :content, :user)",
                     {

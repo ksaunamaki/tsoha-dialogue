@@ -3,12 +3,12 @@
 <h2>{{ topic.name }}</h2>
 <div class="posts">
     {% for post in posts %}
-    <div id="post-{{ post.message_id }}" class="post">
+    <div id="post-{{ post.post_id }}" class="post">
         <div class="post-id">
             {% if post.reply_to %}
-            Message {{ post.message_id }} in <a href="#post-{{ post.reply_to }}">reply to {{ post.reply_to }}</a>
+            Message {{ post.post_id }} in <a href="#post-{{ post.reply_to }}">reply to {{ post.reply_to }}</a>
             {% else %}
-            Message {{ post.message_id }}
+            Message {{ post.post_id }}
             {% endif %}
         </div>
         {% if post.is_deleted %}
@@ -19,13 +19,13 @@
             {% endfor %}
 
             <div class="post-footer">
-                {% if quoted_post == post.message_id %}
+                {% if quoted_post == post.post_id %}
                 <div class="reply-box">
                     <form action="/post_reply" method="POST">
                         <textarea name="content" rows="5" cols="80">{{ quoted_text }}</textarea>
                         <input type="submit" value="Post reply">
                         <input type="hidden" name="topic_id" value="{{ topic.topic_id }}" />
-                        <input type="hidden" name="message_id" value="{{ post.message_id }}" />
+                        <input type="hidden" name="post_id" value="{{ post.post_id }}" />
                         <input type="hidden" name="token" value="{{ session.csrf_token }}">
                         <a class="cancel_reply" href="/read/{{ topic.topic_id }}">Cancel</a>
                     </form>

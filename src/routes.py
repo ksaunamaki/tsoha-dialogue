@@ -89,9 +89,9 @@ def read(topic_id):
                            posts = posts,
                            can_delete = can_delete)
 
-@app.route("/post_reply/<int:topic_id>", defaults={ 'message_id': -1 })
-@app.route("/post_reply/<int:topic_id>/<int:message_id>")
-def compose_reply(topic_id, message_id):
+@app.route("/post_reply/<int:topic_id>", defaults={ 'post_id': -1 })
+@app.route("/post_reply/<int:topic_id>/<int:post_id>")
+def compose_reply(topic_id, post_id):
     topic = topic_manager.get_topic(topic_id)
 
     if topic == None:
@@ -109,7 +109,7 @@ def compose_reply(topic_id, message_id):
         # Internal error
         return redirect("/")
     
-    post = list(filter(lambda post: post.message_id == message_id, posts))
+    post = list(filter(lambda post: post.post_id == post_id, posts))
     text = ""
     
     if len(post) > 0:
@@ -118,13 +118,13 @@ def compose_reply(topic_id, message_id):
         text += "\n\n"
 
     if post is None:
-        message_id = -1
+        post_id = -1
 
     return render_template("reply.html",
                         site_name = site_config.site_name, 
                         topic = topic,
                         posts = posts,
-                        quoted_post = message_id,
+                        quoted_post = post_id,
                         quoted_text = text)
 
 @app.route("/post_reply",methods=["POST"])
@@ -147,14 +147,14 @@ def post_reply():
         if topic_id is None:
             return redirect("/")
 
-        return redirect(f"/post_reply/{topic_id}")
-    
-    new_message_id = topic_manager.add_post_for_topic(topic_id, user.user_id, reply_to, content)
-    
-    if new_message_id is None:
         return redirect(f"/read/{topic_id}")
     
-    return redirect(f"/read/{topic_id}#post-{new_message_id}")
+    new_post_id = topic_manager.add_post_for_topic(topic_id, user.user_id, reply_to, content)
+    
+    if new_post_id is None:
+        return redirect(f"/read/{topic_id}")
+    
+    return redirect(f"/read/{topic_id}#post-{new_post_id}")
 
 @app.route("/delete_post",methods=["POST"])
 def delete_post():
@@ -170,12 +170,12 @@ def delete_post():
         abort(403)
 
     topic_id = request.form["topic_id"] if "topic_id" in request.form else None
-    message_id = request.form["message_id"] if "message_id" in request.form else None
+    post_id = request.form["post_id"] if "post_id" in request.form else None
 
-    if topic_id is None or message_id is None:
+    if topic_id is None or post_id is None:
         return redirect("/")
 
-    topic_manager.delete_post(topic_id, message_id)
+    topic_manager.delete_post(topic_id, post_id)
 
     return redirect(f"/read/{topic_id}")
 

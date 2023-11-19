@@ -4,10 +4,10 @@
 <ul>
     {% for topic in topics %}
     {% if topic.is_upvoted %}
-    <li><span class="upvote voted"><a href="/upvote/{{ topic.topic_id }}">&#9650;</a></span> <a href="/read/{{ topic.topic_id }}" class="topic">{{ topic.name }}</a> (<b>{{ topic.messages }}</b> messages) <br />
+    <li><span class="upvote voted"><a href="/upvote/{{ topic.topic_id }}">&#9650;</a></span> <a href="/read/{{ topic.topic_id }}" class="topic">{{ topic.name }}</a> (<b>{{ topic.posts }}</b> posts) <br />
     <i>{{ topic.user }}</i> on {{ topic.created_at }}</li>
     {% else %}
-    <li><span class="upvote" title="Upvote this topic"><a href="/upvote/{{ topic.topic_id }}">&#9650;</a></span> <a href="/read/{{ topic.topic_id }}" class="topic">{{ topic.name }}</a> (<b>{{ topic.messages }}</b> messages) <br />
+    <li><span class="upvote" title="Upvote this topic"><a href="/upvote/{{ topic.topic_id }}">&#9650;</a></span> <a href="/read/{{ topic.topic_id }}" class="topic">{{ topic.name }}</a> (<b>{{ topic.posts }}</b> posts) <br />
     <i>{{ topic.user }}</i> on {{ topic.created_at }}</li>
     {% endif %}
     {% endfor %}
