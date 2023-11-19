@@ -1,83 +1,84 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>{{ site_name }}</title>
-        <link href="/static/dialogue.css" rel="stylesheet" />
-    </head>
-    <body>
-        <div class="header"><h1><a href="/">{{ site_name }}</a></h1></div>
-        <div class="site">
-            <h2>{{ topic.name }}</h2>
-            <div class="posts">
-                {% for post in posts %}
-                <div id="post-{{ post.message_id }}" class="post">
-                    <div class="post-id">
-                        {% if post.reply_to %}
-                        Message {{ post.message_id }} in <a href="#post-{{ post.reply_to }}">reply to {{ post.reply_to }}</a>
-                        {% else %}
-                        Message {{ post.message_id }}
-                        {% endif %}
-                    </div>
-                    {% for para in post.content_for_html %}
-                    <p>{{para}}</p>
-                    {% endfor %}
-                    <div class="post-footer">
-                        {% if quoted_post == post.message_id %}
-                        <div class="reply-box">
-                            <form action="/post_reply" method="POST">
-                                <textarea name="content" rows="5" cols="80">{{ quoted_text }}</textarea>
-                                <input type="submit" value="Post reply">
-                                <input type="hidden" name="topic_id" value="{{ topic.topic_id }}" />
-                                <input type="hidden" name="reply_to" value="{{ post.message_id }}" />
-                                <a class="cancel_reply" href="/read/{{ topic.topic_id }}">Cancel</a>
-                            </form>
-                        </div>
-                        {% else %}
-                        <div> </div>
-                        {% endif %}
-                        <i>{{ post.user }} on {{ post.created_at }}</i>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            {% if quoted_post == -1 %}
-            <div class="reply-box">
-                <form action="/post_reply" method="POST">
-                    <textarea name="content" rows="5" cols="80" placeholder="Post your reply to {{ topic.name }} here..."></textarea>
-                    <input type="submit" value="Post">
-                    <input type="hidden" name="topic_id" value="{{ topic.topic_id }}" />
-                    <a class="cancel_reply" href="/read/{{ topic.topic_id }}">Cancel</a>
-                </form>
-            </div>
+{% extends "layout.html" %}
+{% block site %}
+<h2>{{ topic.name }}</h2>
+<div class="posts">
+    {% for post in posts %}
+    <div id="post-{{ post.message_id }}" class="post">
+        <div class="post-id">
+            {% if post.reply_to %}
+            Message {{ post.message_id }} in <a href="#post-{{ post.reply_to }}">reply to {{ post.reply_to }}</a>
+            {% else %}
+            Message {{ post.message_id }}
             {% endif %}
         </div>
-        <script>
-            function ready(fn) {
-                if (document.readyState != 'loading'){
-                    fn();
-                } else if (document.addEventListener) {
-                    document.addEventListener('DOMContentLoaded', fn);
-                } else {
-                    document.attachEvent('onreadystatechange', function() {
-                    if (document.readyState != 'loading')
-                        fn();
-                    });
-                }
-            }
+        {% if post.is_deleted %}
+        <i>&#10071; This post has been deleted</i>
+        {% else %}
+            {% for para in post.content_for_html %}
+            <p>{{para}}</p>
+            {% endfor %}
 
-            ready(function() { 
-                var replybox = document.querySelector("textarea");
+            <div class="post-footer">
+                {% if quoted_post == post.message_id %}
+                <div class="reply-box">
+                    <form action="/post_reply" method="POST">
+                        <textarea name="content" rows="5" cols="80">{{ quoted_text }}</textarea>
+                        <input type="submit" value="Post reply">
+                        <input type="hidden" name="topic_id" value="{{ topic.topic_id }}" />
+                        <input type="hidden" name="message_id" value="{{ post.message_id }}" />
+                        <input type="hidden" name="token" value="{{ session.csrf_token }}">
+                        <a class="cancel_reply" href="/read/{{ topic.topic_id }}">Cancel</a>
+                    </form>
+                </div>
+                {% else %}
+                <div> </div>
+                {% endif %}
+                <i>{{ post.user }} on {{ post.created_at }}</i>
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
 
-                if (replybox) {
-                    // Focus input to reply area and select last position on it for writing
-                    replybox.focus();
+{% if quoted_post == -1 %}
+<div class="reply-box">
+    <form action="/post_reply" method="POST">
+        <textarea name="content" rows="5" cols="80" maxlength="20000" placeholder="Post your reply to {{ topic.name }} here..."></textarea>
+        <input type="submit" value="Post">
+        <input type="hidden" name="topic_id" value="{{ topic.topic_id }}" />
+        <input type="hidden" name="token" value="{{ session.csrf_token }}">
+        <a class="cancel_reply" href="/read/{{ topic.topic_id }}">Cancel</a>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
 
-                    var lastpos = replybox.value.length;
-                    replybox.selectionStart = lastpos;
-                    replybox.selectionEnd = lastpos;
-                }
-             });
-            </script>
-    </body>
-</html>
+{% block scripts %}
+<script>
+    function ready(fn) {
+        if (document.readyState != 'loading'){
+            fn();
+        } else if (document.addEventListener) {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            document.attachEvent('onreadystatechange', function() {
+            if (document.readyState != 'loading')
+                fn();
+            });
+        }
+    }
+
+    ready(function() { 
+    var replybox = document.querySelector("textarea");
+
+    if (replybox) {
+        // Focus input to reply area and select last position on it for writing
+        replybox.focus();
+
+        var lastpos = replybox.value.length;
+        replybox.selectionStart = lastpos;
+        replybox.selectionEnd = lastpos;
+    }
+    });
+</script>
+{% endblock %}

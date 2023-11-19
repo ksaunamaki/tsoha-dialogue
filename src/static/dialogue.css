@@ -20,12 +20,26 @@ h2 {
     margin: 1em 0 0 1em;
 }
 
+h3 {
+    margin: 1em 0 0 1.5em;
+}
+
 .header {
     min-height: 4em;
     color: white;
     background-color: rgb(122, 137, 145);
     padding-top: 1em;
     border-bottom: 1px solid rgba(100, 116, 124, 0.9);
+}
+
+.header p {
+    font-size: 0.9em;
+    margin: 1em 0 0.2em 1.1em;
+}
+
+.header p a {
+    color: rgba(224,224,68);
+    text-decoration: none;
 }
 
 ul li {
@@ -102,10 +116,19 @@ ul li .upvote.voted {
     padding: 1em;
 }
 
-.new-reply a,
+.message-tools form {
+    display: inline-block;
+}
+
+.message-tools a,
+.message-tools input[type="submit"],
 .new-topic a,
 .reply-box input[type="submit"],
-.reply-box .cancel_reply {
+.reply-box .cancel_reply,
+.reply-box .cancel_topic,
+.logon-form input[type="submit"],
+.logon-form .register,
+.logon-form .logon {
     margin-top: 0.5em;
     display: inline-block;
     background-color: rgb(122,187,145);
@@ -124,31 +147,104 @@ ul li .upvote.voted {
     transition: color .2s ease-in;
 }
 
-.new-reply a:hover,
+.message-tools a:hover,
 .new-topic a:hover,
-.reply-box input[type="submit"]:hover {
+.reply-box input[type="submit"]:hover,
+.logon-form input[type="submit"]:hover {
     background-color: rgb(47,113,69);
     color: white;
 }
 
-.reply-box .cancel_reply {
+.delete-form input[type="submit"] {
+    background-color: rgb(248,67,67);
+    color: white;
+}
+
+.delete-form input[type="submit"]:hover {
+    background-color: rgb(153,0,0);
+    color: white;
+}
+
+.reply-box .cancel_reply,
+.reply-box .cancel_topic {
     background-color: rgb(229,229,229);
 }
 
-.reply-box .cancel_reply:hover {
+.reply-box .cancel_reply:hover,
+.reply-box .cancel_topic:hover {
     background-color: rgb(190,190,190);
 }
 
-.new-reply a {
+.message-tools a {
     font-style: italic;
 }
 
-.site > .new-reply,
+.logon-form .register {
+    background-color: rgb(72,97,167);
+    color: white;
+}
+
+.logon-form .register:hover {
+    background-color: rgb(37,61,132);
+}
+
+.logon-form .logon {
+    background-color: rgb(229,229,229);
+    color: black;
+}
+
+.logon-form .logon:hover {
+    background-color: rgb(190,190,190);
+    color: white;
+}
+
+.site > .message-tools,
 .site > .new-topic {
     margin-left: 1.5em;
 }
 
-.new-reply a span {
+.message-tools a span {
     position: relative;
     top: 5px;
+}
+
+.logon-form {
+    margin: 1em 0 0 2em;
+}
+
+.topic-form {
+    margin: 1em 0 0 0.5em;
+}
+
+.logon-form label,
+.topic-form label {
+    font-weight: 600;
+}
+
+.logon-form input[type="text"],
+.logon-form input[type="password"] {
+    display: block;
+    margin-top: 0.2em;
+    margin-bottom: 0.5em;
+    line-height: 2em;
+    min-width: 30em;
+}
+
+.topic-form input[type="text"] {
+    display: block;
+    margin-top: 0.4em;
+    margin-bottom: 1em;
+    line-height: 2em;
+    min-width: 30em;
+}
+
+.topic-form textarea {
+    display: block;
+    margin-top: 0.4em;
+    margin-bottom: 1em;
+}
+
+.error {
+    font-weight: 500;
+    color: red;
 }

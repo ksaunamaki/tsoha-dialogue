@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block site %}
+{% if redir == "" %}
+<h3>Logon to {{ site_name }}</h3>
+{% else %}
+<h3>Please logon first to continue with your operation!</h3>
+{% endif %}
+            
+<form class="logon-form" action="/logon" method="POST">
+    <label for="username">Username:</label>
+    <input type="text" name="username" required />
+    <label for="password">Password:</label>
+    <input type="password" name="password" required />
+    <input type="hidden" name="redir" value="{{ redir }}" />
+    <input type="hidden" name="token" value="{{ session.logon_token }}">
+    {% if logon_error %}
+    <p class="error">Logon failed, please check the username and password and try again.</p>
+    {% endif %}
+    <input type="submit" value="Logon">
+    <a class="register" href="/register?redir={{ redir }}">Register as new user instead</a>
+</form>
+{% endblock %}

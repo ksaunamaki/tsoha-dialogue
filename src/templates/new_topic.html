@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block site %}
+<div class="reply-box">
+    <form class="topic-form" action="/post_topic" method="POST">
+        <label for="topic">Enter new topic:</label>
+        <input type="text" id="topic" name="topic" maxlength="100" placeholder="Some awesome topic for my message" required />
+        <label for="message">Enter first message for your topic:</label>
+        <textarea name="message" rows="5" cols="80" maxlength="20000" placeholder="Write the first message here..." required></textarea>
+        <input type="hidden" name="token" value="{{ session.csrf_token }}">
+        <input type="submit" value="Post">
+        <a class="cancel_topic" href="/">Nevermind...</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function ready(fn) {
+        if (document.readyState != 'loading'){
+            fn();
+        } else if (document.addEventListener) {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            document.attachEvent('onreadystatechange', function() {
+            if (document.readyState != 'loading')
+                fn();
+            });
+        }
+    }
+
+    ready(function() { 
+    var topicbox = document.querySelector("input#topic");
+
+    if (topicbox) {
+        // Focus input to topic area
+        topicbox.focus();
+    }
+    });
+</script>
+{% endblock %}

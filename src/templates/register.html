@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block site %}
+<h3>Register as new user account</h3>
+   
+<form class="logon-form" action="/register" method="POST">
+    <label for="name">Username:</label>
+    <input type="text" name="username" required />
+    <label for="password">Password:</label>
+    <input type="password" name="password" required />
+    <input type="hidden" name="redir" value="{{ redir }}" />
+    <input type="hidden" name="token" value="{{ session.register_token }}">
+
+{% if other_error %}
+<p class="error">User account registration failed, please try again little later.</p>
+{% elif user_exists %}
+<p class="error">Username already in use, please choose another or logon as existing user.</p>
+{% endif %}
+         
+    <input type="submit" value="Register as user">
+    <a class="logon" href="/logon?redir={{ redir }}">Logon as existing user instead</a>
+</form>
+{% endblock %}

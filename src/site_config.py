@@ -10,7 +10,7 @@ class SiteConfiguration:
         return self._site_name
     
     def get_configuration_value(self, value_name):
-        results = self.db_access.execute_sql_select("SELECT setting_value FROM site_settings WHERE setting_id = :name",
+        results = self.db_access.execute_sql_query("SELECT setting_value FROM site_settings WHERE setting_id = :name",
                                                     {"name":value_name})
         
         if results is None or len(results) == 0:
@@ -27,7 +27,7 @@ class SiteConfiguration:
 
             print("Creating new secret_key for site")
             secret_key = secrets.token_hex(16)
-            if not self.db_access.execute_sql_insert("INSERT INTO site_settings VALUES (:secretkey, :data)",
+            if not self.db_access.execute_sql_command("INSERT INTO site_settings VALUES (:secretkey, :data)",
                                                  { "secretkey":"secretkey", "data":secret_key }):
                 print("ERROR: Cannot store generated Flask secret_key to site settings!")
 

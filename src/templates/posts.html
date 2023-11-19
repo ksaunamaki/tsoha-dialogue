@@ -1,34 +1,40 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>{{ site_name }}</title>
-        <link href="/static/dialogue.css" rel="stylesheet" />
-    </head>
-    <body>
-        <div class="header"><h1><a href="/">{{ site_name }}</a></h1></div>
-        <div class="site">
-            <h2>{{ topic.name }}</h2>
-            <div class="posts">
-                {% for post in posts %}
-                <div id="post-{{ post.message_id }}" class="post" style="margin-left: {{ post.indent_for_html }}">
-                    <div class="post-id">
-                        {% if post.reply_to %}
-                        Message {{ post.message_id }} in <a href="#post-{{ post.reply_to }}">reply to {{ post.reply_to }}</a>
-                        {% else %}
-                        Message {{ post.message_id }}
-                        {% endif %}
-                    </div>
-                    {% for para in post.content_for_html %}
-                    <p>{{para}}</p>
-                    {% endfor %}
-                    <div class="post-footer">
-                        <div class="new-reply"><a href="/post_reply/{{ topic.topic_id }}/{{ post.message_id }}"><span>&#8617;</span>  reply and quote</a></div>
-                        <i>{{ post.user }} on {{ post.created_at }}</i>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            <div class="new-reply"><a href="/post_reply/{{ topic.topic_id }}">Compose new reply</a></div>
+{% extends "layout.html" %}
+{% block site %}
+<h2>{{ topic.name }}</h2>
+<div class="posts">
+    {% for post in posts %}
+    <div id="post-{{ post.message_id }}" class="post" style="margin-left: {{ post.indent_for_html }}">
+        <div class="post-id">
+            {% if post.reply_to %}
+            Message {{ post.message_id }} in <a href="#post-{{ post.reply_to }}">reply to {{ post.reply_to }}</a>
+            {% else %}
+            Message {{ post.message_id }}
+            {% endif %}
         </div>
-    </body>
-</html>
+        {% if post.is_deleted %}
+        <i>&#10071; This post has been deleted</i>
+        {% else %}
+            {% for para in post.content_for_html %}
+            <p>{{para}}</p>
+            {% endfor %}
+        
+            <div class="post-footer">
+                <div class="message-tools">
+                    <a href="/post_reply/{{ topic.topic_id }}/{{ post.message_id }}"><span>&#8617;</span>  reply and quote</a>
+                    {% if can_delete %}
+                    <form class="delete-form" action="/delete_post" method="POST">
+                        <input type="submit" value="delete">
+                        <input type="hidden" name="topic_id" value="{{ topic.topic_id }}" />
+                        <input type="hidden" name="message_id" value="{{ post.message_id }}" />
+                        <input type="hidden" name="token" value="{{ session.csrf_token }}">
+                    </form>
+                    {% endif %}
+                </div>
+                <i>{{ post.user }} on {{ post.created_at }}</i>
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+<div class="message-tools"><a href="/post_reply/{{ topic.topic_id }}">Compose new reply</a></div>
+{% endblock %}

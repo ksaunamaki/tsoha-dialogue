@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ site_name }}</title>
+        <link href="/static/dialogue.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="header"><h1><a href="/">{{ site_name }}</a></h1>
+            {% if session.user_id %}
+            <p>{{ session.user_name }} (<a href="/logout">logout</a>)</p>
+            {% else %}
+            {% if not hide_logon %}
+            <p>(<a href="/logon">logon</a>)</p>
+            {% endif %}
+            {% endif %}
+        </div>
+        <div class="site">
+            {% block site %}{% endblock %}
+        </div>
+        {% block scripts %}{% endblock %}
+    </body>
+</html>
