@@ -5,6 +5,9 @@ from user_manager import UserManager
 from site_config import SiteConfiguration
 from flask import Flask
 
+env_path = os.path.dirname(__file__) + "/.env"
+tables_path = os.path.dirname(__file__) + "/tables.sql"
+    
 def get_yes_no_answer(prompt, default):
     answer = input(prompt)
 
@@ -40,17 +43,17 @@ def setup_database_connection():
                     server = "localhost"
 
     try:
-        with open("src/.env", "w") as env_file:
+        with open(env_path, "w") as env_file:
             env_file.write(f"DATABASE_URL=postgresql://{credentials}{server}/{database}\n")
     except:
-        print("Cannot write .env file with database connection, please create manually!")
+        print("Cannot write .env file, please create manually!")
         return False
     
     return True
 
 def get_database_connection():
     try:
-        with open("src/.env") as env_file:
+        with open(env_path) as env_file:
             for row in env_file:
                 if row.startswith("DATABASE_URL"):
                     parts = row.split("=")
@@ -65,7 +68,7 @@ def get_database_tables():
     tables = []
 
     try:
-        with open("src/tables.sql") as tables_file:
+        with open(tables_path) as tables_file:
             for row in tables_file:
                 command = row.strip('\n')
 
