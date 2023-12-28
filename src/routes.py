@@ -1,4 +1,4 @@
-from app import app, site_config, topic_manager, user_manager
+from app import app, site_config, topic_manager, user_manager, message_manager, route_context
 from flask import redirect, render_template, request, session, abort
 from urllib.parse import urlparse
 from user_manager import UserRegistrationResult
@@ -9,11 +9,11 @@ max_topics_per_page = 20
 @app.route("/", defaults={ 'after': 0 })
 @app.route("/<int:after>")
 def index(after):
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
     topics = []
 
-    if user is None:
+    if not context.user_logged_in:
         # Anonymous use
         topics = topic_manager.get_topics(None, after, max_topics_per_page)
 
@@ -21,13 +21,14 @@ def index(after):
             after = 0
             topics = topic_manager.get_topics(None, after, max_topics_per_page)
     else:
-        topics = topic_manager.get_topics(user.user_id, after, max_topics_per_page)
+        topics = topic_manager.get_topics(context.current_user.user_id, after, max_topics_per_page)
 
         if len(topics) == 0 and after > 0:
             after = 0
-            topics = topic_manager.get_topics(user.user_id, after, max_topics_per_page)
+            topics = topic_manager.get_topics(context.current_user.user_id, after, max_topics_per_page)
 
     offset = after + max_topics_per_page
+
     return render_template("index.html", 
                            site_name = site_config.site_name, 
                            topics = topics, 
@@ -35,9 +36,9 @@ def index(after):
 
 @app.route("/new_topic")
 def compose_topic():
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
-    if user is None:
+    if not context.user_logged_in:
         return redirect("/logon?redir=" + request.full_path)
 
     return render_template("new_topic.html",
@@ -45,9 +46,9 @@ def compose_topic():
 
 @app.route("/post_topic",methods=["POST"])
 def post_topic():
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
-    if user is None:
+    if not context.user_logged_in:
         abort(403)
 
     if "token" not in request.form or session["csrf_token"] != request.form["token"]:
@@ -60,14 +61,14 @@ def post_topic():
         or len(topic) > 20000 or len(message) > 20000:
         return redirect("/")
 
-    if not topic_manager.add_new_topic(topic, message, user.user_id):
+    if not topic_manager.add_new_topic(topic, message, context.current_user.user_id):
         return redirect("/")
     
     return redirect("/")
 
 @app.route("/read/<int:topic_id>")
 def read(topic_id):
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
     topic = topic_manager.get_topic(topic_id)
 
@@ -81,7 +82,7 @@ def read(topic_id):
         # Internal error
         return redirect("/")
     
-    can_delete = user.is_superuser if user is not None else False
+    can_delete = context.current_user.is_superuser if context.user_logged_in else False
     
     return render_template("posts.html",
                            site_name = site_config.site_name, 
@@ -92,16 +93,16 @@ def read(topic_id):
 @app.route("/post_reply/<int:topic_id>", defaults={ 'post_id': -1 })
 @app.route("/post_reply/<int:topic_id>/<int:post_id>")
 def compose_reply(topic_id, post_id):
+    context = route_context.get()
+
+    if not context.user_logged_in:
+        return redirect("/logon?redir=" + request.full_path)
+
     topic = topic_manager.get_topic(topic_id)
 
     if topic == None:
         # Invalid topic?
         return redirect("/")
-    
-    user = user_manager.get_logged_user()
-
-    if user is None:
-        return redirect("/logon?redir=" + request.full_path)
 
     posts = topic_manager.get_posts_for_topic(topic_id)
 
@@ -129,9 +130,9 @@ def compose_reply(topic_id, post_id):
 
 @app.route("/post_reply",methods=["POST"])
 def post_reply():
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
-    if user is None:
+    if not context.user_logged_in:
         abort(403)
 
     if "token" not in request.form or session["csrf_token"] != request.form["token"]:
@@ -149,7 +150,7 @@ def post_reply():
 
         return redirect(f"/read/{topic_id}")
     
-    new_post_id = topic_manager.add_post_for_topic(topic_id, user.user_id, reply_to, content)
+    new_post_id = topic_manager.add_post_for_topic(topic_id, context.current_user.user_id, reply_to, content)
     
     if new_post_id is None:
         return redirect(f"/read/{topic_id}")
@@ -158,12 +159,12 @@ def post_reply():
 
 @app.route("/delete_post",methods=["POST"])
 def delete_post():
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
-    if user is None:
+    if not context.user_logged_in:
         abort(403)
 
-    if not user.is_superuser:
+    if not context.current_user.is_superuser:
         abort(403)
 
     if "token" not in request.form or session["csrf_token"] != request.form["token"]:
@@ -181,25 +182,25 @@ def delete_post():
 
 @app.route("/upvote/<int:topic_id>")
 def upvote_topic(topic_id):
+    context = route_context.get()
+
+    if not context.user_logged_in:
+        return redirect("/logon?redir=" + request.full_path)
+
     topic = topic_manager.get_topic(topic_id)
 
     if topic is None:
         return redirect("/")
     
-    user = user_manager.get_logged_user()
-
-    if user is None:
-        return redirect("/logon?redir=" + request.full_path)
-    
-    topic_manager.up_or_downvote_topic(topic_id, user.user_id)
+    topic_manager.up_or_downvote_topic(topic_id, context.current_user.user_id)
     
     return redirect("/")
 
 @app.route("/logon",methods=["GET","POST"])
 def logon():
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
-    if user is not None:
+    if context.user_logged_in:
         return redirect("/")
 
     if request.method == "GET":
@@ -251,9 +252,9 @@ def logout():
 
 @app.route("/register",methods=["GET","POST"])
 def register():
-    user = user_manager.get_logged_user()
+    context = route_context.get()
 
-    if user is not None:
+    if context.user_logged_in:
         return redirect("/")
     
     if request.method == "GET":
@@ -301,5 +302,44 @@ def register():
     
     if redir_path != "":
         return redirect(redir_path)
+    
+    return redirect("/")
+
+@app.route("/message_user/<int:user_id>")
+def compose_message(user_id):
+    context = route_context.get()
+
+    if not context.user_logged_in:
+        return redirect("/logon?redir=" + request.full_path)
+    
+    target_user = user_manager.get_user(user_id)
+    
+    if target_user is None:
+        return redirect("/")
+
+    return render_template("new_message.html",
+        site_name = site_config.site_name,
+        target_user = target_user)
+
+@app.route("/post_message",methods=["POST"])
+def post_message():
+    context = route_context.get()
+
+    if not context.user_logged_in:
+        abort(403)
+
+    if "token" not in request.form or session["csrf_token"] != request.form["token"]:
+        abort(403)
+
+    user_id = request.form["user_id"] if "user_id" in request.form else None
+    message = request.form["message"] if "message" in request.form else None
+
+    if message is None or user_id is None or len(message) > 20000:
+        abort(403)
+    
+    new_post_id = message_manager.add_new_message(context.current_user.user_id, user_id, message)
+    
+    if new_post_id is None:
+        abort(403)
     
     return redirect("/")

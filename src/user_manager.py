@@ -1,6 +1,5 @@
-from flask import Flask
+from flask import Flask, session
 from db import DatabaseAccess
-from flask import session
 from argon2 import PasswordHasher, exceptions
 from enum import Enum
 import secrets
@@ -20,6 +19,48 @@ class UserManager:
     def __init__(self, app: Flask, db_access: DatabaseAccess):
         self.db_access = db_access
         self.app = app
+
+    def get_user(self, user_id):
+        results = self.db_access.execute_sql_query(
+            "SELECT * " \
+            "FROM users " \
+            "WHERE user_id = :userid",
+            {"userid": user_id})
+        
+        if results is None or len(results) == 0:
+            return None
+        
+        return User(results[0].user_id, results[0].name, results[0].is_superuser)
+    
+    def get_user_by_username(self, user_name):
+        results = self.db_access.execute_sql_query(
+            "SELECT * " \
+            "FROM users " \
+            "WHERE name = :username",
+            {"username": user_name})
+        
+        if results is None or len(results) == 0:
+            return None
+        
+        return User(results[0].user_id, results[0].name, results[0].is_superuser)
+    
+    def get_users(self, order_by_name = False):
+        ordering = "user_id" if not order_by_name else "name"
+
+        results = self.db_access.execute_sql_query(
+            "SELECT * " \
+            f"FROM users ORDER BY {ordering}",
+            None)
+        
+        if results is None:
+            return None
+        
+        users = []
+
+        for result in results:
+             users.append(User(result.user_id, result.name, result.is_superuser))
+        
+        return users
 
     def get_logged_user(self):
         with self.app.app_context():

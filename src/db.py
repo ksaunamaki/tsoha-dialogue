@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
-from sqlalchemy import exc
+#from sqlalchemy import exc
 from os import getenv
 
 class SqlReturnValuePlaceholder:
@@ -8,8 +8,8 @@ class SqlReturnValuePlaceholder:
         pass
 
 class DatabaseAccess:
-    def __init__(self, app):
-        app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
+    def __init__(self, app, database_url = getenv("DATABASE_URL")):
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_url
         self.db = SQLAlchemy(app)
         self.app = app
 

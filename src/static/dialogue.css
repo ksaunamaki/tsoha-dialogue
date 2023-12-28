@@ -3,8 +3,9 @@ body {
     margin: 0;
 }
 
-body, input {
-    font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif
+body, input, textarea {
+    font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size: medium;
 }
 
 h1 {
@@ -98,6 +99,10 @@ ul li .upvote.voted {
     align-items: flex-end;
 }
 
+.post-footer a {
+    text-decoration: none;
+}
+
 .post i {
     font-size: 0.8em;
     float: right;
@@ -113,7 +118,7 @@ ul li .upvote.voted {
 
 .reply-box textarea {
     display: block;
-    padding: 1em;
+    padding: 0.5em;
 }
 
 .message-tools form {
@@ -236,6 +241,7 @@ ul li .upvote.voted {
     margin-bottom: 1em;
     line-height: 2em;
     min-width: 30em;
+    padding: 0.5em;
 }
 
 .topic-form textarea {

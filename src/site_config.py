@@ -5,6 +5,10 @@ import secrets
 class SiteConfiguration:
     _site_name = ""
 
+    def __init__(self, app: Flask, db_access: DatabaseAccess):
+        self.db_access = db_access
+        self.initialize_site_params(app)
+
     @property
     def site_name(self):
         return self._site_name
@@ -17,6 +21,20 @@ class SiteConfiguration:
             return None
         
         return results[0].setting_value
+    
+    def set_configuration_value(self, value_name, value_data):
+        results = self.db_access.execute_sql_command("INSERT INTO site_settings (setting_id, setting_value) " \
+                                                         "VALUES (:id, :value) ON CONFLICT (setting_id) DO " \
+                                                         "UPDATE SET setting_value = :value",
+                                                        {
+                                                            "id": value_name,
+                                                            "value": value_data
+                                                        })
+        
+        if results is None or not results:
+            return False
+        
+        return True
 
     def initialize_secret(self, app: Flask):
         # Get secret key for session cookie
@@ -39,8 +57,3 @@ class SiteConfiguration:
     def initialize_site_params(self, app: Flask):
         self.initialize_secret(app)
         self.initialize_branding()
-
-    def __init__(self, app: Flask, db_access: DatabaseAccess):
-        self.db_access = db_access
-        self.initialize_site_params(app)
-        

@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block site %}
+<div class="reply-box">
+    <form class="message-form" action="/post_message" method="POST">
+        <label for="message">Send private message to {{ target_user.name }}:</label>
+        <textarea name="message" rows="5" cols="80" maxlength="20000" placeholder="Write your message..." required></textarea>
+        <input type="hidden" name="token" value="{{ session.csrf_token }}">
+        <input type="hidden" name="user_id" value="{{ target_user.user_id }}">
+        <input type="submit" value="Post">
+        <a class="cancel_topic" href="/">Nevermind...</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function ready(fn) {
+        if (document.readyState != 'loading'){
+            fn();
+        } else if (document.addEventListener) {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            document.attachEvent('onreadystatechange', function() {
+            if (document.readyState != 'loading')
+                fn();
+            });
+        }
+    }
+
+    ready(function() { 
+    var messagebox = document.querySelector("textarea");
+
+    if (messagebox) {
+        // Focus input to message
+        messagebox.focus();
+    }
+    });
+</script>
+{% endblock %}

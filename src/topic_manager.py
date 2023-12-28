@@ -13,11 +13,12 @@ class Topic:
         self.is_upvoted = is_upvoted
 
 class Post:
-    def __init__(self, post_id, reply_to, created_at, content, user, is_deleted):
+    def __init__(self, post_id, reply_to, created_at, content, user_id, user, is_deleted):
         self.post_id = post_id
         self.reply_to = reply_to
         self.created_at = created_at
         self.content = content
+        self.user_id = user_id
         self.user = user
         self.indent_level = 0
         self.is_deleted = is_deleted
@@ -173,10 +174,10 @@ class TopicManager:
     def get_posts_for_topic(self, topic_id):
 
         results = self.db_access.execute_sql_query(
-            "SELECT m.post_id,m.content,m.reply_to,m.created_at,u.name,m.is_deleted " \
+            "SELECT m.post_id,m.content,m.reply_to,m.created_at,u.user_id,u.name,m.is_deleted " \
             "FROM posts AS m, users AS u " \
             "WHERE m.topic_id = :topic AND m.user_id = u.user_id " \
-            "GROUP BY m.post_id, u.name " \
+            "GROUP BY m.post_id, u.user_id, u.name " \
             "ORDER BY m.post_id",
             {"topic":topic_id})
         
@@ -184,7 +185,7 @@ class TopicManager:
             return None
         
         posts = list(map(lambda result: Post(result.post_id, result.reply_to, result.created_at.strftime('%Y-%m-%d %H:%M:%S'), \
-                                             result.content, result.name, result.is_deleted), results))
+                                             result.content, result.user_id, result.name, result.is_deleted), results))
 
         # re-order posts by reply-to thread order and set indenting values
         message_pointers = {}

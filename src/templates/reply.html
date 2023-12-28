@@ -33,7 +33,12 @@
                 {% else %}
                 <div> </div>
                 {% endif %}
-                <i>{{ post.user }} on {{ post.created_at }}</i>
+                <i>
+                    {% if post.user_id != session.user_id %}
+                    <a href="/message_user/{{ post.user_id }}" title="Send private message to {{ post.user }}">&#128231;</a>
+                    {% endif %}
+                    {{ post.user }} on {{ post.created_at }}
+                </i>
             </div>
         {% endif %}
     </div>
