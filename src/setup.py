@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     app = Flask(__name__)
     db = DatabaseAccess(app, database_uri)
-    site_configuration = SiteConfiguration(app, db)
+    site_configuration = SiteConfiguration(app, db, False)
     user_manager = UserManager(app, db)
 
     if not setup_database(db):

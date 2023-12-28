@@ -5,9 +5,11 @@ import secrets
 class SiteConfiguration:
     _site_name = ""
 
-    def __init__(self, app: Flask, db_access: DatabaseAccess):
+    def __init__(self, app: Flask, db_access: DatabaseAccess, init = True):
         self.db_access = db_access
-        self.initialize_site_params(app)
+
+        if init:
+            self.initialize_site_params(app)
 
     @property
     def site_name(self):
