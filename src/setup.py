@@ -20,9 +20,28 @@ def setup_database_connection():
     if database == "":
         database = "dialogue"
 
+    credentials = ""
+
+    if get_yes_no_answer("Do you want to specify explicit credentials " + 
+                         "to connect to database (N/y)? ", 'n') == 'y':
+        user_name = input("Enter Postgres username to use: ")
+
+        if user_name == "":
+            print("Assuming no explicit credentials are needed afterall!")
+        else:
+            password = input("Enter Postgres user's password: ")
+
+            if user_name == "":
+                print("Assuming no explicit credentials are needed afterall!")
+            else:
+                credentials = f"{user_name}:{password}@"
+
+                if server == "":
+                    server = "localhost"
+
     try:
         with open("src/.env", "w") as env_file:
-            env_file.write(f"DATABASE_URL=postgresql://{server}/{database}\n")
+            env_file.write(f"DATABASE_URL=postgresql://{credentials}{server}/{database}\n")
     except:
         print("Cannot write .env file with database connection, please create manually!")
         return False

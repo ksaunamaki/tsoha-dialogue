@@ -1,6 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
-#from sqlalchemy import exc
 from os import getenv
 
 class SqlReturnValuePlaceholder:
