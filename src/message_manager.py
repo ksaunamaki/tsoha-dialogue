@@ -1,13 +1,17 @@
 from db import DatabaseAccess
-from db import SqlReturnValuePlaceholder
 
 class Message:
-    def __init__(self, message_id, to_user, from_user, content, created_at):
+    def __init__(self, message_id, to_user, from_user, from_user_id, content, created_at):
         self.message_id = message_id
         self.to_user = to_user
         self.from_user = from_user
+        self.from_user_id = from_user_id
         self.content = content
         self.created_at = created_at
+
+    @property
+    def content_for_html(self):
+        return self.content.split('\n')
 
 class MessageManager:
     def __init__(self, db_access: DatabaseAccess):
@@ -17,13 +21,13 @@ class MessageManager:
         results = self.db_access.execute_sql_query(
             "SELECT COUNT(*) " \
             "FROM messages " \
-            "WHERE to_user = :touserid ",
+            "WHERE to_user = :touserid AND read_at IS NULL",
             {"touserid": to_user_id})
         
         if results is None or len(results) == 0:
             return None
         
-        return results[0]
+        return results[0][0]
 
     def get_unread_messages(self, to_user_id):
         results = self.db_access.execute_sql_query(
@@ -41,7 +45,8 @@ class MessageManager:
         if results is None or len(results) == 0:
             return None
         
-        messages = list(map(lambda result: Message(result.message_id, result.from_user, result.to_user, \
+        messages = list(map(lambda result: Message(result.message_id, result.to_user, \
+                                                    result.from_user, result.from_user_id, \
                                                     result.content, result.created_at.strftime('%Y-%m-%d %H:%M:%S')), \
                                                     results))
         
@@ -57,6 +62,18 @@ class MessageManager:
                 "content": message_content,
                 "userto": user_to,
                 "userfrom": user_from,
+            })
+        
+        return result
+    
+    def set_message_as_read(self, to_user, message_id):
+        result = self.db_access.execute_sql_command(
+            "UPDATE messages " \
+            "SET read_at = now() " \
+            "WHERE to_user = :touser AND message_id = :messageid",
+            {
+                "touser": to_user,
+                "messageid": message_id,
             })
         
         return result

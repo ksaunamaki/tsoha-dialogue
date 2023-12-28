@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block site %}
+<div class="message">
+    <div class="message-header">From: {{ message.from_user }} at {{ message.created_at }}</div>
+    <div class="message-content">
+        {% for para in message.content_for_html %}
+        <p>{{para}}</p>
+        {% endfor %}
+    </div>
+</div>
+<div class="message-tools">
+    <a href="/message_user/{{ message.from_user_id }}">Reply to {{ message.from_user }}</a>
+</div>
+{% if is_more_messages %}
+<a class="navigate" href="/read_messages">Read next message &#8594;</a>
+{% else %}
+<a class="navigate" href="/">&#8404; Go back to topics</a>
+{% endif %}
+{% endblock %}

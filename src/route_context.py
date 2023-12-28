@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 
 class RouteContext:
     def __init__(self, app: Flask, user_manager, message_manager):
@@ -12,6 +12,7 @@ class RouteContext:
         context.messages_count = 0
 
         with self._app.app_context():
+            session["messages_count"] = 0
             context.current_user = self._user_manager.get_logged_user()
             
             if context.current_user is not None:
@@ -20,5 +21,6 @@ class RouteContext:
 
                 if unread is not None:
                     context.messages_count = unread
+                    session["messages_count"] = unread
 
         return context

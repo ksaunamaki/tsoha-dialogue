@@ -1,5 +1,4 @@
 from db import DatabaseAccess
-from datetime import datetime
 from db import SqlReturnValuePlaceholder
 
 class Topic:

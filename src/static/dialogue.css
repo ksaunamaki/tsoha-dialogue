@@ -25,6 +25,10 @@ h3 {
     margin: 1em 0 0 1.5em;
 }
 
+a {
+    text-decoration: none;
+}
+
 .header {
     min-height: 4em;
     color: white;
@@ -40,7 +44,10 @@ h3 {
 
 .header p a {
     color: rgba(224,224,68);
-    text-decoration: none;
+}
+
+.header p a.new-messages {
+    color: rgb(255, 200, 166);
 }
 
 ul li {
@@ -49,8 +56,8 @@ ul li {
 }
 
 ul li a.topic {
-    text-decoration: none;
     color: rgb(79,155,180);
+    font-size: 1.1em;
 }
 
 ul li .upvote {
@@ -58,7 +65,6 @@ ul li .upvote {
 }
 
 ul li .upvote a {
-    text-decoration: none;
     color: inherit;
 }
 
@@ -76,7 +82,8 @@ ul li .upvote.voted {
     margin-right: 10em;
 }
 
-.post {
+.post,
+.message {
     display: block;
     margin: 1em;
     padding: 0.5em;
@@ -99,13 +106,20 @@ ul li .upvote.voted {
     align-items: flex-end;
 }
 
-.post-footer a {
-    text-decoration: none;
-}
-
 .post i {
     font-size: 0.8em;
     float: right;
+}
+
+.message-header {
+    margin: 0.1em 0 1em 0.5em;
+    font-weight: 500;
+    padding-bottom: 0.2em;
+    border-bottom: 1px solid rgba(70, 70, 70, 0.2);
+}
+
+.message-content {
+    margin: 0 0.5em 0.5em 0.5em;
 }
 
 .reply-box {
@@ -180,8 +194,17 @@ ul li .upvote.voted {
     background-color: rgb(190,190,190);
 }
 
+.message-form textarea {
+    margin-top: 1em;
+}
+
 .message-tools a {
     font-style: italic;
+}
+
+.message-count {
+    font-weight: 600;
+    font-size: 1.1em;
 }
 
 .logon-form .register {
@@ -253,4 +276,18 @@ ul li .upvote.voted {
 .error {
     font-weight: 500;
     color: red;
+}
+
+.navigate {
+    display: block;
+    font-weight: 600;
+    font-size: 1.1em;
+    color: rgb(0, 0, 0);
+    margin-left: 1.5em;
+    margin-top: 1em;
+    transition: color .2s ease-in;
+}
+
+.navigate:hover {
+    color: rgb(79, 155, 180);
 }

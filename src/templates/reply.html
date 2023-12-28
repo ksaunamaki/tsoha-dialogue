@@ -25,7 +25,7 @@
                         <textarea name="content" rows="5" cols="80">{{ quoted_text }}</textarea>
                         <input type="submit" value="Post reply">
                         <input type="hidden" name="topic_id" value="{{ topic.topic_id }}" />
-                        <input type="hidden" name="post_id" value="{{ post.post_id }}" />
+                        <input type="hidden" name="reply_to" value="{{ post.post_id }}" />
                         <input type="hidden" name="token" value="{{ session.csrf_token }}">
                         <a class="cancel_reply" href="/read/{{ topic.topic_id }}">Cancel</a>
                     </form>
@@ -56,6 +56,7 @@
     </form>
 </div>
 {% endif %}
+<a class="navigate" href="/">&#8404; Go back to topics</a>
 {% endblock %}
 
 {% block scripts %}

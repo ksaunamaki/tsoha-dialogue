@@ -343,3 +343,33 @@ def post_message():
         abort(403)
     
     return redirect("/")
+
+@app.route("/read_messages")
+def read_messages():
+    context = route_context.get()
+
+    if not context.user_logged_in or context.messages_count == 0:
+        return redirect("/")
+    
+    # Get first unread message
+    messages = message_manager.get_unread_messages(context.current_user.user_id)
+
+    if messages is None or len(messages) == 0:
+        return redirect("/")
+    
+    message_index = 1
+    
+    for message in messages:
+        if not message_manager.set_message_as_read(context.current_user.user_id, message.message_id):
+            # Could not mark message as read, try next
+            message_index += 1
+            continue
+
+        session["messages_count"] = context.messages_count - 1
+
+        return render_template("show_message.html", 
+                            site_name = site_config.site_name, 
+                            message = message,
+                            is_more_messages = message_index < len(messages))
+    
+    return redirect("/")
